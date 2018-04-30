@@ -1,0 +1,24 @@
+function t = ttgenerate(b,err)
+c=b;
+n=size(b);
+d = numel(n);
+r = ones(d+1,1);
+core=cell(1,d);
+ep=err/sqrt(d-1);
+for i=1:d-1
+    c=reshape(c,[n(i)*r(i),numel(c)/(n(i)*r(i))]);
+    [u,s,v]=svd(c,'econ');
+    s=diag(s); 
+    r1=my_chop2(s,ep*norm(s));  % minimal possible rank satisfying accuracy
+    u=u(:,1:r1); 
+    s=s(1:r1); 
+    v=v(:,1:r1); % truncate u,s,v
+    r(i+1)=r1; % update r
+    core{i}=reshape(u(:),[r(i),n(i),r(i+1)]); % generate core
+    c=diag(s)*v'; % update c
+end
+core{d}=reshape(c(:),[r(d),n(d),1]);
+t.d=d;
+t.n=n;
+t.r=r;
+t.core=core;
